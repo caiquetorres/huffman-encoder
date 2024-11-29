@@ -16,11 +16,11 @@ make build
 ./bin/compression_tool decode -f file_to_decode.huff -o decoded_file.txt
 ```
 
-<!-- ## Test
+## Test
 
 To run tests for the tool, use the following command:
 
 ```sh
 # Run tests
 make test
-``` -->
+```
