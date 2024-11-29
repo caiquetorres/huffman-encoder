@@ -1,15 +1,22 @@
 package huffman
 
-type heap struct {
+type node[T comparable] struct {
+	val  T
+	freq uint
+	l    *node[T]
+	r    *node[T]
+}
+
+type heap[T comparable] struct {
 	s   uint
-	buf [256]*node
+	buf [256]*node[T]
 }
 
-func newHeap() *heap {
-	return &heap{}
+func newHeap[T comparable]() *heap[T] {
+	return &heap[T]{}
 }
 
-func (h *heap) push(node *node) {
+func (h *heap[T]) push(node *node[T]) {
 	h.s++
 	i := h.s - 1
 	h.buf[i] = node
@@ -19,7 +26,7 @@ func (h *heap) push(node *node) {
 	}
 }
 
-func (h *heap) pop() *node {
+func (h *heap[T]) pop() *node[T] {
 	if h.s == 0 {
 		return nil
 	}
@@ -30,32 +37,32 @@ func (h *heap) pop() *node {
 	return root
 }
 
-func (h *heap) peek() *node {
+func (h *heap[T]) peek() *node[T] {
 	if h.s == 0 {
 		return nil
 	}
 	return h.buf[0]
 }
 
-func (h *heap) parent(i uint) uint {
+func (h *heap[T]) parent(i uint) uint {
 	return (i - 1) / 2
 }
 
-func (h *heap) left(i uint) uint {
+func (h *heap[T]) left(i uint) uint {
 	return 2*i + 1
 }
 
-func (h *heap) right(i uint) uint {
+func (h *heap[T]) right(i uint) uint {
 	return 2*i + 2
 }
 
-func (h *heap) swap(a uint, b uint) {
+func (h *heap[T]) swap(a uint, b uint) {
 	temp := h.buf[a]
 	h.buf[a] = h.buf[b]
 	h.buf[b] = temp
 }
 
-func (h *heap) heapify(i uint) {
+func (h *heap[T]) heapify(i uint) {
 	l := h.left(i)
 	r := h.right(i)
 	s := i

@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/caiquetorres/compression-tool/encoder"
+	"github.com/caiquetorres/compression-tool/huffman"
 )
 
 type commandOptions struct {
@@ -88,7 +88,8 @@ func encode(inputPath, outputPath string) error {
 		return err
 	}
 	defer outputFile.Close()
-	return encoder.Encode(inputFile, outputFile)
+	e := huffman.NewEncoder(inputFile, outputFile)
+	return e.Encode()
 }
 
 func decode(srcFilePath, outFilePath string) {

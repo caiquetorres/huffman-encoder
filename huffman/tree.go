@@ -2,17 +2,17 @@ package huffman
 
 type path = []byte
 
-type Tree struct {
-	r *node
+type tree struct {
+	r *node[byte]
 	m map[byte]path
 }
 
-func NewTree(o map[byte]uint) *Tree {
-	h := newHeap()
+func newTree(o map[byte]uint) *tree {
+	h := newHeap[byte]()
 	for i := range 256 {
 		b := byte(i)
 		if o[b] != 0 {
-			n := &node{val: b, freq: o[b], l: nil, r: nil}
+			n := &node[byte]{val: b, freq: o[b], l: nil, r: nil}
 			h.push(n)
 		}
 	}
@@ -20,29 +20,28 @@ func NewTree(o map[byte]uint) *Tree {
 		l := h.pop()
 		r := h.pop()
 		freq := l.freq + r.freq
-		n := &node{val: ' ', freq: freq, l: l, r: r}
+		n := &node[byte]{val: ' ', freq: freq, l: l, r: r}
 		h.push(n)
 	}
 	m := map[byte]path{}
 	r := h.peek()
 	fill(m, path{}, r)
-	return &Tree{r: r, m: m}
+	return &tree{r: r, m: m}
 }
 
-func (t *Tree) Path(b byte) path {
+func (t *tree) Path(b byte) path {
 	return t.m[b]
 }
 
-func fill(m map[byte]path, p path, n *node) {
+func fill(m map[byte]path, p path, n *node[byte]) {
 	if n == nil {
 		return
 	}
 	if n.l == nil && n.r == nil {
-		dst := make(path, len(p))
+		m[n.val] = make(path, len(p))
 		for i, v := range p {
-			dst[i] = v
+			m[n.val][i] = v
 		}
-		m[n.val] = dst
 	}
 	p = append(p, '0')
 	fill(m, p, n.l)
