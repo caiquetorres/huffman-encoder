@@ -10,10 +10,10 @@ To build and run the tool, use the following commands:
 make build
 
 # encoding
-./bin/compression_tool encode -f file_to_encode.txt -o output_file.huff
+./bin/encoder encode -f file_to_encode.txt -o output_file.huff
 
 # decoding
-./bin/compression_tool decode -f file_to_decode.huff -o decoded_file.txt
+./bin/encoder decode -f file_to_decode.huff -o decoded_file.txt
 ```
 
 ## Test

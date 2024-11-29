@@ -1,8 +1,8 @@
 build:
-	@go build -o bin/compression_tool cmd/main.go
+	@go build -o bin/encoder cmd/main.go
 
 run: build
-	@./bin/compression_tool
+	@./bin/encoder
 
 test:
 	@go test ./... -v
