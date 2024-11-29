@@ -1,4 +1,4 @@
-# Compression Tool
+# Huffman Encoder
 This repository provides a solution for [Coding Challenge #03](https://codingchallenges.fyi/challenges/challenge-huffman), which involves creating an implementation of the huffman encoder and decoder
 
 ## Build and Run
