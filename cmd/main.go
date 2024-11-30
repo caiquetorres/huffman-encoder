@@ -30,12 +30,13 @@ func main() {
 	}
 	switch options.Type {
 	case "encode":
-		err := encode(options.InputFile, options.OutputFile)
-		if err != nil {
+		if err := encode(options.InputFile, options.OutputFile); err != nil {
 			log.Fatal(err)
 		}
 	case "decode":
-		decode(options.InputFile, options.OutputFile)
+		if err := decode(options.InputFile, options.OutputFile); err != nil {
+			log.Fatal(err)
+		}
 	default:
 		errLogger.Printf("unknown command: %s\n", options.Type)
 	}
@@ -92,6 +93,20 @@ func encode(inputPath, outputPath string) error {
 	return e.Encode()
 }
 
-func decode(srcFilePath, outFilePath string) {
-	fmt.Println("decoding...")
+func decode(inputPath, outputPath string) error {
+	inputFile, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer inputFile.Close()
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+		return err
+	}
+	outputFile, err := os.OpenFile(outputPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+	e := huffman.NewDecoder(inputFile, outputFile)
+	return e.Decode()
 }
