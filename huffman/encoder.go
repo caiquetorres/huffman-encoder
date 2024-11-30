@@ -1,8 +1,6 @@
 package huffman
 
 import (
-	"bufio"
-	"fmt"
 	"io"
 	"strconv"
 )
@@ -18,10 +16,10 @@ func NewEncoder(r io.ReadSeeker, w io.Writer) *Encoder {
 
 func (e *Encoder) Encode() error {
 	wr := newWriter(e.w)
-	re := bufio.NewReader(e.r)
+	re := newReader(e.r)
 	occ := map[byte]uint{}
 	for {
-		b, err := re.ReadByte()
+		b, err := re.nextByte()
 		if err != nil {
 			break
 		}
@@ -43,13 +41,15 @@ func (e *Encoder) Encode() error {
 			wr.writeByte(',')
 		}
 		hasPrev = true
-		wr.writeString(fmt.Sprintf("%s:%s", string(byte(i)), strconv.FormatUint(uint64(freq), 10)))
+		wr.writeByte(byte(i))
+		wr.writeByte(';')
+		wr.writeString(strconv.FormatUint(uint64(freq), 10))
 	}
 	wr.writeByte(';')
 	e.r.Seek(int64(0), io.SeekStart)
 	bitCount := 0
 	for {
-		b, err := re.ReadByte()
+		b, err := re.nextByte()
 		if err != nil {
 			break
 		}
