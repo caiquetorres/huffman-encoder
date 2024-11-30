@@ -23,7 +23,7 @@ func (e *Decoder) Decode() error {
 	if string(fileName) != "HUFF" {
 		return fmt.Errorf("file is not huff")
 	}
-	re.nextByte() // ;
+	re.nextByte() // ';'
 	occ := map[byte]uint{}
 	byteCount := uint(0)
 	for {
@@ -31,17 +31,17 @@ func (e *Decoder) Decode() error {
 		if err != nil {
 			break
 		}
-		re.nextByte() // :
+		re.nextByte() // ':'
 		freq, err := decodeNumber(re)
 		byteCount += freq
 		occ[b] = freq
-		b, err = re.peekByte() // ,
+		b, err = re.peekByte() // ','
 		if err != nil || b == ';' {
 			break
 		}
 		re.nextByte()
 	}
-	re.nextByte() // ;
+	re.nextByte() // ';'
 	tree := newTree(occ)
 	for range byteCount {
 		b, err := decodeHuff(re, tree.r)

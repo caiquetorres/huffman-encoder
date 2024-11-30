@@ -19,27 +19,32 @@ func newWriter(w io.Writer) *writer {
 	}
 }
 
+func (w *writer) write(p []byte) (int, error) {
+	return w.w.Write(p)
+}
+
 func (w *writer) writeByte(b byte) error {
 	return w.w.WriteByte(b)
 }
 
-func (w *writer) writeBit(b byte) error {
-	if b == 1 {
+func (w *writer) writeBit(bit bool) error {
+	if bit {
 		w.c |= (1 << w.b)
 	}
 	if w.b == 0 {
-		w.writeByte(w.c)
+		if err := w.writeByte(w.c); err != nil {
+			return err
+		}
 		w.b = 7
 		w.c = 0
 	} else {
 		w.b--
 	}
-	return nil // REVIEW: Should we return something here?
+	return nil
 }
 
-func (w *writer) writeString(s string) error {
-	_, err := w.w.WriteString(s)
-	return err
+func (w *writer) writeString(s string) (int, error) {
+	return w.w.WriteString(s)
 }
 
 func (w *writer) flush() error {

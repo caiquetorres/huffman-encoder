@@ -1,6 +1,6 @@
 package huffman
 
-type path = []byte
+type path = []bool
 
 type tree struct {
 	r *node[byte]
@@ -26,10 +26,10 @@ func newTree(o map[byte]uint) *tree {
 	m := map[byte]path{}
 	r := h.peek()
 	fill(m, path{}, r)
-	return &tree{r: r, m: m}
+	return &tree{r, m}
 }
 
-func (t *tree) Path(b byte) path {
+func (t *tree) path(b byte) path {
 	return t.m[b]
 }
 
@@ -43,10 +43,10 @@ func fill(m map[byte]path, p path, n *node[byte]) {
 			m[n.val][i] = v
 		}
 	}
-	p = append(p, '0')
+	p = append(p, false)
 	fill(m, p, n.l)
 	p = p[:len(p)-1]
-	p = append(p, '1')
+	p = append(p, true)
 	fill(m, p, n.r)
 	p = p[:len(p)-1]
 }

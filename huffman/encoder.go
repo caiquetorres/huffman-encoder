@@ -11,7 +11,7 @@ type Encoder struct {
 }
 
 func NewEncoder(r io.ReadSeeker, w io.Writer) *Encoder {
-	return &Encoder{r: r, w: w}
+	return &Encoder{r, w}
 }
 
 func (e *Encoder) Encode() error {
@@ -41,8 +41,7 @@ func (e *Encoder) Encode() error {
 			wr.writeByte(',')
 		}
 		hasPrev = true
-		wr.writeByte(byte(i))
-		wr.writeByte(';')
+		wr.write([]byte{byte(i), ';'})
 		wr.writeString(strconv.FormatUint(uint64(freq), 10))
 	}
 	wr.writeByte(';')
@@ -53,15 +52,15 @@ func (e *Encoder) Encode() error {
 		if err != nil {
 			break
 		}
-		p := tree.Path(b)
+		p := tree.path(b)
 		for _, d := range p {
 			bitCount++
-			wr.writeBit(d - '0')
+			wr.writeBit(d)
 		}
 	}
 	remainCount := 8 - bitCount%8
 	for range remainCount {
-		wr.writeBit(0)
+		wr.writeBit(false)
 	}
 	wr.flush()
 	return nil
