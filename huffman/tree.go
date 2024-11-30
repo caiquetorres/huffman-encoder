@@ -3,50 +3,50 @@ package huffman
 type path = []bool
 
 type tree struct {
-	r *node[byte]
-	m map[byte]path
+	root    *node[byte]
+	codeMap map[byte]path
 }
 
 func newTree(o map[byte]uint) *tree {
 	h := newHeap[byte]()
 	for i := range 256 {
-		b := byte(i)
-		if o[b] != 0 {
-			n := &node[byte]{val: b, freq: o[b], l: nil, r: nil}
+		ch := byte(i)
+		if o[ch] != 0 {
+			n := &node[byte]{val: ch, freq: o[ch], l: nil, r: nil}
 			h.push(n)
 		}
 	}
-	for h.s > 1 {
+	for h.size > 1 {
 		l := h.pop()
 		r := h.pop()
 		freq := l.freq + r.freq
 		n := &node[byte]{val: ' ', freq: freq, l: l, r: r}
 		h.push(n)
 	}
-	m := map[byte]path{}
+	codeMap := map[byte]path{}
 	r := h.peek()
-	fill(m, path{}, r)
-	return &tree{r, m}
+	fill(codeMap, path{}, r)
+	return &tree{r, codeMap}
 }
 
 func (t *tree) path(b byte) path {
-	return t.m[b]
+	return t.codeMap[b]
 }
 
-func fill(m map[byte]path, p path, n *node[byte]) {
+func fill(codeMap map[byte]path, p path, n *node[byte]) {
 	if n == nil {
 		return
 	}
 	if n.l == nil && n.r == nil {
-		m[n.val] = make(path, len(p))
+		codeMap[n.val] = make(path, len(p))
 		for i, v := range p {
-			m[n.val][i] = v
+			codeMap[n.val][i] = v
 		}
 	}
 	p = append(p, false)
-	fill(m, p, n.l)
+	fill(codeMap, p, n.l)
 	p = p[:len(p)-1]
 	p = append(p, true)
-	fill(m, p, n.r)
+	fill(codeMap, p, n.r)
 	p = p[:len(p)-1]
 }

@@ -16,42 +16,56 @@ func NewDecoder(r io.ReadSeeker, w io.Writer) *Decoder {
 }
 
 func (e *Decoder) Decode() error {
-	re := newReader(e.r)
-	wr := newWriter(e.w)
+	r := newReader(e.r)
+	w := newWriter(e.w)
 	fileName := make([]byte, 4)
-	re.read(fileName)
+	r.read(fileName)
 	if string(fileName) != "HUFF" {
 		return fmt.Errorf("file is not huff")
 	}
-	re.nextByte() // ';'
-	occ := map[byte]uint{}
+	r.nextByte() // ';'
+	countMap := map[byte]uint{}
 	byteCount := uint(0)
 	for {
-		b, err := re.nextByte()
+		ch, err := r.nextByte()
 		if err != nil {
 			break
 		}
-		re.nextByte() // ':'
-		freq, err := decodeNumber(re)
-		byteCount += freq
-		occ[b] = freq
-		b, err = re.peekByte() // ','
-		if err != nil || b == ';' {
+		_, err = r.nextByte() // ':'
+		if err != nil {
 			break
 		}
-		re.nextByte()
+		freq, err := decodeNumber(r)
+		if err != nil {
+			break
+		}
+		byteCount += freq
+		countMap[ch] = freq
+		ch, err = r.peekByte() // ','
+		if err != nil || ch == ';' {
+			break
+		}
+		_, err = r.nextByte()
+		if err != nil {
+			break
+		}
 	}
-	re.nextByte() // ';'
-	tree := newTree(occ)
+	_, err := r.nextByte() // ';'
+	if err != nil {
+		return err
+	}
+	tree := newTree(countMap)
 	for range byteCount {
-		b, err := decodeHuff(re, tree.r)
+		ch, err := decodeHuff(r, tree.root)
 		if err != nil {
 			return err
 		}
-		wr.writeByte(b)
+		err = w.writeByte(ch)
+		if err != nil {
+			return err
+		}
 	}
-	wr.flush()
-	return nil
+	return w.flush()
 }
 
 func decodeNumber(r *reader) (uint, error) {
@@ -66,7 +80,10 @@ func decodeNumber(r *reader) (uint, error) {
 		}
 		ans += uint(b - '0')
 		ans *= 10
-		r.nextByte()
+		_, err = r.nextByte()
+		if err != nil {
+			break
+		}
 	}
 	ans /= 10
 	return ans, nil

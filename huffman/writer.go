@@ -6,16 +6,16 @@ import (
 )
 
 type writer struct {
-	w *bufio.Writer
-	b byte
-	c byte
+	w      *bufio.Writer
+	bitIdx byte
+	ch     byte
 }
 
 func newWriter(w io.Writer) *writer {
 	return &writer{
-		b: 7,
-		c: 0,
-		w: bufio.NewWriter(w),
+		bitIdx: 7,
+		ch:     0,
+		w:      bufio.NewWriter(w),
 	}
 }
 
@@ -29,16 +29,16 @@ func (w *writer) writeByte(b byte) error {
 
 func (w *writer) writeBit(bit bool) error {
 	if bit {
-		w.c |= (1 << w.b)
+		w.ch |= (1 << w.bitIdx)
 	}
-	if w.b == 0 {
-		if err := w.writeByte(w.c); err != nil {
+	if w.bitIdx == 0 {
+		if err := w.writeByte(w.ch); err != nil {
 			return err
 		}
-		w.b = 7
-		w.c = 0
+		w.bitIdx = 7
+		w.ch = 0
 	} else {
-		w.b--
+		w.bitIdx--
 	}
 	return nil
 }

@@ -15,53 +15,74 @@ func NewEncoder(r io.ReadSeeker, w io.Writer) *Encoder {
 }
 
 func (e *Encoder) Encode() error {
-	wr := newWriter(e.w)
-	re := newReader(e.r)
-	occ := map[byte]uint{}
+	w := newWriter(e.w)
+	r := newReader(e.r)
+	countMap := map[byte]uint{}
 	for {
-		b, err := re.nextByte()
+		ch, err := r.nextByte()
 		if err != nil {
 			break
 		}
-		if _, ok := occ[b]; !ok {
-			occ[b] = 1
+		if _, ok := countMap[ch]; !ok {
+			countMap[ch] = 1
 		} else {
-			occ[b]++
+			countMap[ch]++
 		}
 	}
-	tree := newTree(occ)
-	wr.writeString("HUFF;")
+	tree := newTree(countMap)
+	_, err := w.writeString("HUFF;")
+	if err != nil {
+		return err
+	}
 	hasPrev := false
 	for i := range 256 {
-		freq := occ[byte(i)]
+		ch := byte(i)
+		freq := countMap[ch]
 		if freq == 0 {
 			continue
 		}
 		if hasPrev {
-			wr.writeByte(',')
+			w.writeByte(',')
 		}
 		hasPrev = true
-		wr.write([]byte{byte(i), ';'})
-		wr.writeString(strconv.FormatUint(uint64(freq), 10))
+		_, err := w.write([]byte{ch, ';'})
+		if err != nil {
+			return err
+		}
+		_, err = w.writeString(strconv.FormatUint(uint64(freq), 10))
+		if err != nil {
+			return err
+		}
 	}
-	wr.writeByte(';')
-	e.r.Seek(int64(0), io.SeekStart)
+	err = w.writeByte(';')
+	if err != nil {
+		return err
+	}
+	_, err = e.r.Seek(int64(0), io.SeekStart)
+	if err != nil {
+		return err
+	}
 	bitCount := 0
 	for {
-		b, err := re.nextByte()
+		b, err := r.nextByte()
 		if err != nil {
 			break
 		}
 		p := tree.path(b)
 		for _, d := range p {
 			bitCount++
-			wr.writeBit(d)
+			err = w.writeBit(d)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	remainCount := 8 - bitCount%8
 	for range remainCount {
-		wr.writeBit(false)
+		err = w.writeBit(false)
+		if err != nil {
+			return err
+		}
 	}
-	wr.flush()
-	return nil
+	return w.flush()
 }

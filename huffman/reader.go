@@ -6,16 +6,17 @@ import (
 )
 
 type reader struct {
-	r *bufio.Reader
-	b byte
-	c byte
+	r      *bufio.Reader
+	bitIdx byte
+	ch     byte
 }
 
 func newReader(r io.Reader) *reader {
-	re := bufio.NewReader(r)
+
 	return &reader{
-		r: re,
-		b: 7,
+		r:      bufio.NewReader(r),
+		bitIdx: 7,
+		ch:     0,
 	}
 }
 
@@ -36,16 +37,16 @@ func (r *reader) nextByte() (byte, error) {
 }
 
 func (r *reader) nextBit() (byte, error) {
-	c, err := r.peekByte()
+	ch, err := r.peekByte()
 	if err != nil {
 		return 0, err
 	}
-	bit := c & (1 << r.b)
-	if r.b == 0 {
-		r.b = 7
+	bit := ch & (1 << r.bitIdx)
+	if r.bitIdx == 0 {
+		r.bitIdx = 7
 		r.nextByte()
 	} else {
-		r.b--
+		r.bitIdx--
 	}
 	if bit != 0 {
 		return 1, nil

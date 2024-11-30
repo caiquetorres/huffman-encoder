@@ -8,8 +8,8 @@ type node[T comparable] struct {
 }
 
 type heap[T comparable] struct {
-	s   uint
-	buf [256]*node[T]
+	size uint
+	buf  [256]*node[T]
 }
 
 func newHeap[T comparable]() *heap[T] {
@@ -17,8 +17,8 @@ func newHeap[T comparable]() *heap[T] {
 }
 
 func (h *heap[T]) push(node *node[T]) {
-	h.s++
-	i := h.s - 1
+	h.size++
+	i := h.size - 1
 	h.buf[i] = node
 	for i > 0 && h.buf[h.parent(i)].freq > h.buf[i].freq {
 		h.swap(i, h.parent(i))
@@ -27,18 +27,18 @@ func (h *heap[T]) push(node *node[T]) {
 }
 
 func (h *heap[T]) pop() *node[T] {
-	if h.s == 0 {
+	if h.size == 0 {
 		return nil
 	}
 	root := h.buf[0]
-	h.buf[0] = h.buf[h.s-1]
-	h.s--
+	h.buf[0] = h.buf[h.size-1]
+	h.size--
 	h.heapify(0)
 	return root
 }
 
 func (h *heap[T]) peek() *node[T] {
-	if h.s == 0 {
+	if h.size == 0 {
 		return nil
 	}
 	return h.buf[0]
@@ -65,15 +65,15 @@ func (h *heap[T]) swap(a uint, b uint) {
 func (h *heap[T]) heapify(i uint) {
 	l := h.left(i)
 	r := h.right(i)
-	s := i
-	if l < h.s && h.buf[l].freq < h.buf[i].freq {
-		s = l
+	smallest := i
+	if l < h.size && h.buf[l].freq < h.buf[i].freq {
+		smallest = l
 	}
-	if r < h.s && h.buf[r].freq < h.buf[s].freq {
-		s = r
+	if r < h.size && h.buf[r].freq < h.buf[smallest].freq {
+		smallest = r
 	}
-	if s != i {
-		h.swap(i, s)
-		h.heapify(s)
+	if smallest != i {
+		h.swap(i, smallest)
+		h.heapify(smallest)
 	}
 }
